@@ -1,87 +1,42 @@
 import './App.css';
-import Weather from './Weather.js';
+import Weather from './components/Weather.js';
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
-import React,{useState} from 'react';
-
-const sampleData = [
-    {
-      "cityName": "Delhi",
-      "forecast": [
-          {
-        "Day": "Monday",
-        "temp": 33,
-        "humidity": 76
-      },
-      {
-          "Day": "Tuesday",
-          "temp": 34,
-          "humidity": 76
-      },
-      {
-        "Day": "Wednesday",
-        "temp": 34,
-        "humidity": 76
-    
-    },{
-      "Day": "Thursday",
-      "temp": 34,
-      "humidity": 76
-  
-  },{
-    "Day": "Friday",
-    "temp": 34,
-    "humidity": 76
-},
-    ]
-    },
-    {
-      "cityName": "Mumbai",
-      "forecast": [
-          {
-        "Day": "Monday",
-        "temp": 44,
-        "humidity": 76
-      },
-      {
-          "Day": "Tuesday",
-          "temp": 46,
-          "humidity": 76
-      }
-    ]
-    }
-];
-
-
-// const sampleData = {
-//   "forecast": [
-//       {
-//     "Day": "Monday",
-//     "temp": 23,
-//     "humidity": 76
-//   },
-//   {
-//       "Day": "Tuesday",
-//       "temp": 28,
-//       "humidity": 76
-//   }
-// ]
-// };
+import React,{useState,useEffect} from 'react';
+import {getTodos,cities} from './Service.js';
 
 function App() {
-  const options = sampleData.map(x=>x.cityName);
+  const options = cities;
   const defaultOption = options[0];
 
-  const [weatherData,setWeatherData] = useState(sampleData[0]);
+  const [weatherData,setWeatherData] = useState(undefined);
+  const [selectedCity,setSelectedCity] = useState(defaultOption);
 
-  const _onSelect = (event,child) => {
-     const option = sampleData.filter(x=>x.cityName === event.value)[0];
-     setWeatherData(option);
+  const _onSelect = (event) =>{
+      getWeatherData(event.value);
   };
+
+  const getWeatherData = (city) => {
+    setWeatherData(undefined);
+    getTodos(city).then(response => {
+        const forecast =  response.forecast.forecastday;
+        if(forecast != undefined) {
+        const objects = forecast.map(cast => {
+          return {'date':cast.date,'temp':cast.day.avgtemp_c,'humidity':cast.day.avghumidity,'icon':cast.day.condition.icon}
+        });
+        setWeatherData(objects ? {'forecast':objects} : undefined);
+        setSelectedCity(city);
+      }
+    });
+  };
+
+  useEffect(() => {
+    getWeatherData(defaultOption);
+  },[]);
 
   return (
     [<Dropdown options={options} onChange={_onSelect} value={defaultOption} placeholder="Select an option" />
-    ,<Weather {...weatherData}/>,<h1 style={{textAlign:'center'}}>{weatherData.cityName}</h1>]
+    ,<Weather {...weatherData}/>,<h1 style={{textAlign:'center'}}>{selectedCity}</h1>]
   );
 }
 
