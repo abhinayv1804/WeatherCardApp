@@ -1,9 +1,17 @@
 import axios from "axios";
 const url = "https://api.weatherapi.com/v1/forecast.json?days=10&key=59f7319ca73c40d99d8113739231907"
-const getTodos = (city) => 
+const getWeatherDataFromAPI = (city) => 
      axios
      .get(url+"&q="+city)
-  .then(response => response.data)
+  .then(response => {
+    const forecast =  response.data.forecast.forecastday;
+    if(forecast != undefined) {
+      const objects = forecast.map(cast => {
+        return {'date':cast.date,'temp':cast.day.avgtemp_c,'humidity':cast.day.avghumidity,'icon':cast.day.condition.icon}
+      });
+      return objects;
+    }
+  })
   .catch(error => {
     if (error.response && error.response.status === 404) {
       return `\u2014`;
@@ -59,4 +67,4 @@ const sampleData = [
     }
 ];
 
-export {getTodos,cities};
+export {getWeatherDataFromAPI,cities};

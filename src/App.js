@@ -3,7 +3,7 @@ import Weather from './components/Weather.js';
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 import React,{useState,useEffect} from 'react';
-import {getTodos,cities} from './Service.js';
+import {getWeatherDataFromAPI,cities} from './Service.js';
 
 function App() {
   const options = cities;
@@ -18,15 +18,9 @@ function App() {
 
   const getWeatherData = (city) => {
     setWeatherData(undefined);
-    getTodos(city).then(response => {
-        const forecast =  response.forecast.forecastday;
-        if(forecast != undefined) {
-        const objects = forecast.map(cast => {
-          return {'date':cast.date,'temp':cast.day.avgtemp_c,'humidity':cast.day.avghumidity,'icon':cast.day.condition.icon}
-        });
+    getWeatherDataFromAPI(city).then(objects => {
         setWeatherData(objects ? {'forecast':objects} : undefined);
         setSelectedCity(city);
-      }
     });
   };
 
